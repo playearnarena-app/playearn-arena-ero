@@ -21,6 +21,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import org.json.JSONObject;
 
 public final class MainActivity extends Activity {
@@ -46,6 +49,47 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public void signIn() {
             runOnUiThread(() -> startGoogleSignIn());
         }
+    }
+
+    private final class FirebaseBridge {
+        @JavascriptInterface public void createAccount(String email, String password) {
+            runOnUiThread(() -> FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().getUser() != null) sendFirebaseToken(task.getResult().getUser());
+                    else notifyFirebaseError(task.getException() == null ? "Firebase registration failed." : task.getException().getMessage());
+                }));
+        }
+        @JavascriptInterface public void signIn(String email, String password) {
+            runOnUiThread(() -> FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult().getUser() != null) sendFirebaseToken(task.getResult().getUser());
+                    else notifyFirebaseError(task.getException() == null ? "Firebase login failed." : task.getException().getMessage());
+                }));
+        }
+    }
+
+    private void sendFirebaseToken(FirebaseUser user) {
+        if (user == null || webView == null) { notifyFirebaseError("Firebase user session unavailable."); return; }
+        user.getIdToken(true).addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                String token = task.getResult().getToken();
+                webView.post(() -> webView.evaluateJavascript(
+                    "window.onFirebaseAuthSuccess && window.onFirebaseAuthSuccess(" + JSONObject.quote(token) + ");", null));
+            } else notifyFirebaseError("Could not obtain Firebase ID token. Please try again.");
+        });
+    }
+
+    private void notifyFirebaseError(String message) {
+        if (webView != null) webView.post(() -> webView.evaluateJavascript(
+            "window.onFirebaseAuthError && window.onFirebaseAuthError(" + JSONObject.quote(message == null ? "Firebase authentication failed." : message) + ");", null));
+    }
+
+    private void signInGoogleWithFirebase(String googleIdToken) {
+        FirebaseAuth.getInstance().signInWithCredential(GoogleAuthProvider.getCredential(googleIdToken, null))
+            .addOnCompleteListener(this, task -> {
+                if (task.isSuccessful() && task.getResult().getUser() != null) sendFirebaseToken(task.getResult().getUser());
+                else notifyFirebaseError("Google account could not be connected to Firebase.");
+            });
     }
 
     private void startGoogleSignIn() {
@@ -80,10 +124,7 @@ public final class MainActivity extends Activity {
                 notifyGoogleError("Google did not return a sign-in token. Check OAuth setup.");
                 return;
             }
-            if (webView != null) {
-                webView.post(() -> webView.evaluateJavascript(
-                        "window.onNativeGoogleSignInSuccess && window.onNativeGoogleSignInSuccess(" + JSONObject.quote(idToken) + ");", null));
-            }
+            signInGoogleWithFirebase(idToken);
         } catch (ApiException e) {
             String message = e.getStatusCode() == 12501 ? "Google sign-in cancelled." :
                     "Google sign-in failed (code " + e.getStatusCode() + "). Check Android OAuth package and SHA-1 settings.";
@@ -131,6 +172,7 @@ public final class MainActivity extends Activity {
 
         webView.addJavascriptInterface(new SessionBridge(), "AndroidSession");
         webView.addJavascriptInterface(new GoogleBridge(), "AndroidGoogle");
+        webView.addJavascriptInterface(new FirebaseBridge(), "AndroidFirebase");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
