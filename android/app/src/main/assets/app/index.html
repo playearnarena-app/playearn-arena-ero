@@ -1341,38 +1341,50 @@ var m=$('lm');if(m)m.oninput=function(){m.value=m.value.replace(/\D/g,'')};
 var rpf=$('regPf');if(rpf)rpf.onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(!/^image\//.test(f.type))return tt('Please choose an image');var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),z=256,s=Math.min(im.width,im.height);c.width=c.height=z;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,z,z);regPhotoData=c.toDataURL('image/jpeg',.82);var av=$('regAvPrev'),tx=$('regPhTxt');if(av){av.style.background='url('+regPhotoData+') center/cover';av.textContent=''}if(tx)tx.textContent='✅ Photo uploaded & ready';tt('Profile photo selected!')};im.onerror=function(){tt('Could not read that image')};im.src=rd.result};rd.readAsDataURL(f)}}
 qa('#lt div').forEach(function(d){d.onclick=function(){MD=+d.dataset.m;regPhotoData=null;fm()}});
 
-$('lb').onclick=async function(){var u=$('lu').value.trim(),p=$('lp').value;var body={};
-if(MD){var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),rc=$('lr')?$('lr').value.trim().toUpperCase():'';
-if(!/^\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
-if(fn.length<2)return tt('Please enter your Full Name');
-if(!/^[6-9]\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
-if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))return tt('Enter a valid email ID');
-if(p.length<8||p.length>128)return tt('Password must be 8–128 characters');
-if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
-body={username:u,full_name:fn,phone:m,email:e,password:p,referral_code:rc};
-}else{if(!u||!p)return tt('Enter your login details');body={identifier:u,password:p}}
-var b=$('lb');b.disabled=true;var label=b.textContent;b.textContent='Please wait...';
-try{var d=await apiCall(MD?'/auth/register':'/auth/login',{method:'POST',body:body});if(!d.token||!d.user)throw new Error('Server did not return a valid session');storeApiToken(d.token);var who=d.user.username||u;try{_LS.setItem('pe_me',who)}catch(e){}ME=who;enter(who);await refreshServerAccount();go('home');tt(MD?'Account created successfully':'Login successful');if(MD)showWelcome(d.user.display_name||fn)}catch(e){tt(e.message)}finally{b.disabled=false;b.textContent=label}};
-
-
+window._peAuthProfile={};window._peAuthProvider='password';
+$('lb').onclick=function(){
+ var u=$('lu').value.trim(),pw=$('lp').value,body={};
+ if(MD){
+  var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),rc=$('lr')?$('lr').value.trim().toUpperCase():'';
+  if(!/^\\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
+  if(fn.length<2)return tt('Please enter your Full Name');
+  if(!/^[6-9]\\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
+  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(e))return tt('Enter a valid email ID');
+  if(pw.length<8||pw.length>128)return tt('Password must be 8–128 characters');
+  if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
+  body={username:u,full_name:fn,phone:m,referral_code:rc};
+  if(!window.AndroidFirebase||typeof AndroidFirebase.createAccount!=='function')return tt('Firebase authentication is not available. Update the app.');
+  window._peAuthProfile=body;window._peAuthProvider='password';
+  $('lb').disabled=true;$('lb').textContent='Creating account...';
+  AndroidFirebase.createAccount(e,pw);
+ }else{
+  if(!u||!pw)return tt('Enter your email and password');
+  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(u))return tt('Please login using your registered email address');
+  if(!window.AndroidFirebase||typeof AndroidFirebase.signIn!=='function')return tt('Firebase authentication is not available. Update the app.');
+  window._peAuthProfile={};window._peAuthProvider='password';
+  $('lb').disabled=true;$('lb').textContent='Signing in...';
+  AndroidFirebase.signIn(u.toLowerCase(),pw);
+ }
+};
+window.onFirebaseAuthError=function(message){$('lb').disabled=false;$('lb').textContent=MD?'Create Account':'Login';tt(message||'Firebase authentication failed')};
+window.onFirebaseAuthSuccess=async function(idToken){
+ var b=$('lb'),g=$('googleLogin');if(b){b.disabled=true;b.textContent='Connecting account...'}if(g)g.disabled=true;
+ try{
+  var body=Object.assign({},window._peAuthProfile||{},{idToken:idToken,provider:window._peAuthProvider||'password'});
+  var d=await apiCall('/auth/firebase',{method:'POST',body:body});
+  if(!d.token||!d.user)throw new Error('Server did not return a valid PlayEarn session');
+  storeApiToken(d.token);var who=d.user.username||('player_'+d.user.id);
+  try{_LS.setItem('pe_me',who)}catch(e){}
+  ME=who;enter(who);await refreshServerAccount();go('home');tt('Login successful');
+  if(MD&&body.full_name)showWelcome(body.full_name);
+ }catch(e){tt(e.message||'Could not connect Firebase account to PlayEarn')}
+ finally{if(b){b.disabled=false;b.textContent=MD?'Create Account':'Login'}if(g)g.disabled=false}
+};
 $('googleLogin').onclick=function(){
- if(window.AndroidGoogle&&typeof window.AndroidGoogle.signIn==='function'){window.AndroidGoogle.signIn();return}
+ if(window.AndroidGoogle&&typeof window.AndroidGoogle.signIn==='function'){window._peAuthProfile={};window._peAuthProvider='google';window.AndroidGoogle.signIn();return}
  tt('Google Sign-In is available in the Android app only');
 };
-window.onNativeGoogleSignInError=function(message){tt(message||'Google sign-in failed')};
-window.onNativeGoogleSignInSuccess=async function(idToken){
- var b=$('googleLogin');if(b){b.disabled=true;b.textContent='Signing in...'}
- try{
-  var d=await apiCall('/auth/google',{method:'POST',body:{credential:idToken}});
-  if(!d.token||!d.user)throw new Error('Server did not return a valid Google session');
-  storeApiToken(d.token);
-  var who=d.user.username||('google_'+d.user.id);
-  try{_LS.setItem('pe_me',who)}catch(e){}
-  ME=who;enter(who);await refreshServerAccount();go('home');
-  tt('Google sign-in successful');
- }catch(e){tt(e.message||'Google sign-in failed')}
- finally{if(b){b.disabled=false;b.innerHTML='<span style="font-size:20px;font-weight:800;color:#4285f4">G</span> Continue with Google'}}
-};
+window.onNativeGoogleSignInError=function(message){$('googleLogin').disabled=false;tt(message||'Google sign-in failed')};
 
 fm();
 (function restoreServerSession(){var token=apiToken();if(!token)return;apiCall('/me').then(function(d){var u=d.user||{},name=u.username||'Player',local=US().filter(function(x){return x.u===name})[0]||{};local.u=name;local.fn=u.display_name||'';local.e=u.email||'';local.m=u.phone||'';sv(US().filter(function(x){return x.u!==name}).concat([local]));ME=name;enter(name);go('home');refreshServerAccount()}).catch(function(){clearApiToken();try{_LS.removeItem('pe_me')}catch(e){}})})();
