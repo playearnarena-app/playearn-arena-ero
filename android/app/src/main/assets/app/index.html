@@ -1309,6 +1309,12 @@ function art(n){var m={'Amazon Pay':'<span class="lg" style="background:#111;col
 function tl(t,id,a){return '<b style="font-size:15px">'+t+'</b><div class="tgr">'+a.map(function(n,i){return '<div class="tl'+(i?'':' on')+'" onclick="pk(\''+id+'\',\''+n+'\',this)">'+art(n)+n+'</div>'}).join('')+'</div><select id="'+id+'" style="display:none">'+opts(a)+'</select>'+(id=='f2'?'<div class="mut sm">Gift card is issued only when valid supply/API and redemption support exist for that provider.</div>':'')}
 function pk(id,v,el){$(id).value=v;Array.prototype.forEach.call(el.parentNode.children,function(x){x.classList.remove('on')});el.classList.add('on');if(id=='f3')fp();if(id=='f2')ah()}
 ['home','quiz','spin','wal','pr','ad','wd','help','set','gift'].forEach(function(i){if($(i))$(i).insertAdjacentHTML('afterbegin','<svg class="wm lw"><use href="#lg"/></svg>')});
+var API_BASE='https://playearn-arena-api.onrender.com/api/v1';
+function apiToken(){try{return window.AndroidSession?AndroidSession.getToken():_LS.getItem('pe_api_token')||''}catch(e){return ''}}
+function storeApiToken(t){try{if(window.AndroidSession)AndroidSession.setToken(t);else _LS.setItem('pe_api_token',t)}catch(e){}}
+function clearApiToken(){try{if(window.AndroidSession)AndroidSession.clearToken();else _LS.removeItem('pe_api_token')}catch(e){}}
+async function apiCall(path,opts){opts=opts||{};var headers=Object.assign({'Content-Type':'application/json'},opts.headers||{}),t=apiToken();if(t)headers.Authorization='Bearer '+t;var r=await fetch(API_BASE+path,{method:opts.method||'GET',headers:headers,body:opts.body?JSON.stringify(opts.body):undefined,mode:'cors',credentials:'omit'});var d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||('API request failed ('+r.status+')'));return d}
+async function refreshServerAccount(){if(!apiToken())return;try{var d=await apiCall('/me');var u=d.user||{};var bal=await apiCall('/wallet');var tx=await apiCall('/transactions?limit=30');var w=bal.wallet||{};S.ads=(Number(w.currency_balance_paise)||0)/100;S.pts=Number(w.points)||0;S.tx=(tx.transactions||[]).map(function(x){var delta=Number(x.paise_delta||0),pd=Number(x.points_delta||0),amt=delta?((delta>0?'+':'-')+'₹'+(Math.abs(delta)/100).toFixed(2)):(pd?(pd>0?'+':'-')+Math.abs(pd)+' Points':'₹0.00');return {n:String(x.event_type||'Transaction').replace(/_/g,' '),d:new Date(x.created_at).toLocaleString(),a:amt,r:delta<0||pd<0,k:false}});var user=US().filter(function(x){return x.u===(u.username||'')})[0]||{};user.u=u.username||user.u||'Player';user.fn=u.display_name||user.fn||'';user.e=u.email||user.e||'';user.m=u.phone||user.m||'';var users=US().filter(function(x){return x.u!==user.u});users.push(user);sv(users);$('pn').textContent=(user.fn?user.fn+' (@'+user.u+')':user.u);$('pe').textContent=user.e;$('pm').textContent=user.m?'+91 '+user.m:'';up()}catch(e){if(/Authentication required|Invalid or expired session/i.test(e.message)){clearApiToken();try{_LS.removeItem('pe_me')}catch(x){}ME=null;go('login')}else tt('Wallet sync: '+e.message)}}
 var ME=null,MD=1;
 function US(){try{return JSON.parse(_LS.getItem('pe_users'))||[]}catch(e){return[]}}
 function sv(a){try{_LS.setItem('pe_users',JSON.stringify(a))}catch(e){}}
@@ -1321,7 +1327,7 @@ var d=new Date().toDateString();if(S.day!=d){S.day=d;S.done=0}
 try{NS=+_LS.getItem('pe_ns_'+u)||0}catch(e){NS=0}
 $('pn').textContent=r.fn?(r.fn+' (@'+r.u+')'):r.u;$('pe').textContent=r.e||'';$('pm').textContent=r.m?'+91 '+r.m:'';$('pa').textContent=r.u[0].toUpperCase();up();tick()}
 function start(u){try{_LS.setItem('pe_me',u)}catch(e){}enter(u);go('home')}
-function lo(){try{_LS.removeItem('pe_me')}catch(e){}ME=null;NS=0;S={ads:0,pts:0,done:0,tx:[],sp:[],amt:100};tick();go('login')}
+function lo(){var oldToken=apiToken();if(oldToken)apiCall('/auth/logout',{method:'POST'}).catch(function(){});clearApiToken();try{_LS.removeItem('pe_me')}catch(e){}ME=null;NS=0;S={ads:0,pts:0,done:0,tx:[],sp:[],amt:100};tick();go('login')}
 document.querySelector('.lo').onclick=lo;
 function fi(p,t,i,m){return '<input class="fld" id="'+i+'" type="'+t+'" placeholder="'+p+'" autocomplete="off"'+(m?' maxlength="10" inputmode="numeric"':'')+'>'}
 var regPhotoData=null;
@@ -1347,24 +1353,23 @@ var m=$('lm');if(m)m.oninput=function(){m.value=m.value.replace(/\D/g,'')};
 var rpf=$('regPf');if(rpf)rpf.onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(!/^image\//.test(f.type))return tt('Please choose an image');var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),z=256,s=Math.min(im.width,im.height);c.width=c.height=z;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,z,z);regPhotoData=c.toDataURL('image/jpeg',.82);var av=$('regAvPrev'),tx=$('regPhTxt');if(av){av.style.background='url('+regPhotoData+') center/cover';av.textContent=''}if(tx)tx.textContent='✅ Photo uploaded & ready';tt('Profile photo selected!')};im.onerror=function(){tt('Could not read that image')};im.src=rd.result};rd.readAsDataURL(f)}}
 qa('#lt div').forEach(function(d){d.onclick=function(){MD=+d.dataset.m;regPhotoData=null;fm()}});
 $('gg').onclick=function(){tt('Google Sign-In is not connected yet. Please use Sign Up.')};
-$('lb').onclick=function(){var u=$('lu').value.trim(),p=$('lp').value;
-if(MD){var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),a=US();
-if(!/^\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
+$('lb').onclick=async function(){var u=$('lu').value.trim(),p=$('lp').value;var body={};
+if(MD){var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),rc=$('lr')?$('lr').value.trim().toUpperCase():'';
+if(!/^\\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
 if(fn.length<2)return tt('Please enter your Full Name');
-if(!/^[6-9]\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
-if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))return tt('Enter a valid email ID');
-if(p.length!=8)return tt('Password must be exactly 8 characters');if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
-if(a.some(function(r){return r.u.toLowerCase()==u.toLowerCase()}))return tt('Username already taken');
-if(a.some(function(r){return r.m==m}))return tt('Mobile number already registered');
-if(a.some(function(r){return r.e==e}))return tt('Email already registered');var rc=$('lr').value.trim().toUpperCase(),rb=rc?findRefOwner(rc,a):null;if(rc&&(!rb||rb.toLowerCase()==u.toLowerCase()))return tt(rb?'You cannot use your own referral code':'Referral code not found');
-H(p).then(function(h){var nowTs=Date.now();a.push({u:u,fn:fn,m:m,e:e,h:h,refBy:rb||'',t:nowTs});sv(a);codeOf(u);if(regPhotoData){PHM[u]=regPhotoData;try{_LS.setItem('pe_ph_'+u,regPhotoData)}catch(e){}}regPhotoData=null;PENDING_REF='';try{_LS.removeItem('pe_pending_ref')}catch(e){}if(rb)credit(rb,{u:u,fn:fn,e:e,t:nowTs});start(u);tt('Account created');showWelcome(fn||u)})}
-else{var k=u.toLowerCase();if(!k||!p)return tt('Enter your login details');
-var r=US().filter(function(x){return x.u.toLowerCase()==k||x.m==u||x.e==k})[0];if(!r)return tt('Account not found. Please sign up');
-H(p).then(function(h){if(h!=r.h)return tt('Wrong password');start(r.u)})}};
+if(!/^[6-9]\\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
+if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(e))return tt('Enter a valid email ID');
+if(p.length<8||p.length>128)return tt('Password must be 8–128 characters');
+if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
+body={username:u,full_name:fn,phone:m,email:e,password:p,referral_code:rc};
+}else{if(!u||!p)return tt('Enter your login details');body={identifier:u,password:p}}
+var b=$('lb');b.disabled=true;var label=b.textContent;b.textContent='Please wait...';
+try{var d=await apiCall(MD?'/auth/register':'/auth/login',{method:'POST',body:body});if(!d.token||!d.user)throw new Error('Server did not return a valid session');storeApiToken(d.token);var who=d.user.username||u;try{_LS.setItem('pe_me',who)}catch(e){}ME=who;enter(who);await refreshServerAccount();go('home');tt(MD?'Account created successfully':'Login successful');if(MD)showWelcome(d.user.display_name||fn)}catch(e){tt(e.message)}finally{b.disabled=false;b.textContent=label}};
+
 fm();
 try{var _u=_LS.getItem('pe_me');if(_u&&US().some(function(r){return r.u==_u}))enter(_u)}catch(e){}
 var PHM={};function ph(){var d=PHM[ME]||null;try{d=d||_LS.getItem('pe_ph_'+ME)}catch(e){}var a=$('pa'),ha=$('hmAv');if(d){a.style.background='url('+d+') center/cover';a.textContent='';if(ha){ha.style.background='url('+d+') center/cover';ha.textContent=''}$('rp').style.display='block'}else{a.style.background='';var r=US().filter(function(x){return x.u==ME})[0],ini=r?r.u[0].toUpperCase():'P';a.textContent=r?r.u[0].toUpperCase():'';if(ha){ha.style.background='';ha.textContent=ini}$('rp').style.display='none'}}
-var _en=enter;enter=function(u){_en(u);ph()};
+var _en=enter;enter=function(u){_en(u);ph();if(apiToken())refreshServerAccount()};
 $('cm').onclick=$('pa').onclick=function(){if(ME)$('pf').click()};
 $('pf').onchange=function(){var f=this.files[0];if(!f)return;if(!/^image\//.test(f.type))return tt('Please choose an image');var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),z=256,s=Math.min(im.width,im.height);c.width=c.height=z;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,z,z);var d=c.toDataURL('image/jpeg',.82);PHM[ME]=d;try{_LS.setItem('pe_ph_'+ME,d);tt('Profile photo updated')}catch(e){tt('Photo set, but it will not be remembered after you close the app')}ph()};im.onerror=function(){tt('Could not read that image')};im.src=r.result};r.readAsDataURL(f)};
 $('rp').onclick=function(){delete PHM[ME];try{_LS.removeItem('pe_ph_'+ME)}catch(e){}ph();tt('Photo removed')};
