@@ -16,10 +16,17 @@ import android.webkit.JavascriptInterface;
 import android.content.SharedPreferences;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import org.json.JSONObject;
 
 public final class MainActivity extends Activity {
     private WebView webView;
     private SharedPreferences sessionPrefs;
+    private static final int RC_GOOGLE_SIGN_IN = 9001;
 
     private final class SessionBridge {
         @JavascriptInterface public String getToken() {
@@ -32,6 +39,57 @@ public final class MainActivity extends Activity {
         }
         @JavascriptInterface public void clearToken() {
             sessionPrefs.edit().remove("api_token").apply();
+        }
+    }
+
+    private final class GoogleBridge {
+        @JavascriptInterface public void signIn() {
+            runOnUiThread(() -> startGoogleSignIn());
+        }
+    }
+
+    private void startGoogleSignIn() {
+        if (BuildConfig.GOOGLE_WEB_CLIENT_ID == null || BuildConfig.GOOGLE_WEB_CLIENT_ID.isEmpty()) {
+            notifyGoogleError("Google Sign-In is not configured yet.");
+            return;
+        }
+        GoogleSignInOptions options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                .requestEmail()
+                .build();
+        GoogleSignInClient client = GoogleSignIn.getClient(this, options);
+        startActivityForResult(client.getSignInIntent(), RC_GOOGLE_SIGN_IN);
+    }
+
+    private void notifyGoogleError(String message) {
+        if (webView != null) {
+            webView.post(() -> webView.evaluateJavascript(
+                    "window.onNativeGoogleSignInError && window.onNativeGoogleSignInError(" + JSONObject.quote(message) + ");", null));
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != RC_GOOGLE_SIGN_IN) return;
+        try {
+            GoogleSignInAccount account = GoogleSignIn.getSignedInAccountFromIntent(data)
+                    .getResult(ApiException.class);
+            String idToken = account == null ? null : account.getIdToken();
+            if (idToken == null || idToken.isEmpty()) {
+                notifyGoogleError("Google did not return a sign-in token. Check OAuth setup.");
+                return;
+            }
+            if (webView != null) {
+                webView.post(() -> webView.evaluateJavascript(
+                        "window.onNativeGoogleSignInSuccess && window.onNativeGoogleSignInSuccess(" + JSONObject.quote(idToken) + ");", null));
+            }
+        } catch (ApiException e) {
+            String message = e.getStatusCode() == 12501 ? "Google sign-in cancelled." :
+                    "Google sign-in failed (code " + e.getStatusCode() + "). Check Android OAuth package and SHA-1 settings.";
+            notifyGoogleError(message);
+        } catch (Exception e) {
+            notifyGoogleError("Google sign-in could not be completed. Please try again.");
         }
     }
 
@@ -72,6 +130,7 @@ public final class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
         webView.addJavascriptInterface(new SessionBridge(), "AndroidSession");
+        webView.addJavascriptInterface(new GoogleBridge(), "AndroidGoogle");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
