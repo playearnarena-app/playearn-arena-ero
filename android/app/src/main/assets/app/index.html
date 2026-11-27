@@ -982,8 +982,6 @@ body {
 <section class="s on" id="splash" style="justify-content:center;align-items:center;text-align:center"><div class="hero"></div><div class="face-reveal-badge">🔒 Face Reveal Coming Soon</div><div class="ctr" style="position:absolute;bottom:128px;left:0;right:0;font-size:12px;letter-spacing:1px">PLAY MORE. EARN REWARDS. RULE THE ARENA.</div><div style="width:70%;position:absolute;bottom:60px"><div class="bar"><i id="ld" style="background:#f0abfc"></i></div><div style="margin-top:10px">Loading...</div></div></section>
 
 <section class="s" id="login"><div class="hero" style="height:27%"></div><div style="flex:1;min-height:110px"></div>
-<div class="btn w2" id="gg" style="display:flex;align-items:center;justify-content:center;gap:10px"><svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span>Continue with Google</span></div>
-<div class="ctr mut sm">— or —</div>
 <div class="tabs" id="lt"><div class="on" data-m="1">Sign Up</div><div data-m="0">Login</div></div>
 <div id="lf"></div><div class="btn" id="lb">Create Account</div>
 <div class="ctr mut sm">By continuing, you agree to our <u id="lt3" style="cursor:pointer;color:#c4b5fd">Terms &amp; Conditions</u></div></section>
@@ -1335,19 +1333,19 @@ var PENDING_REF=(function(){
  if(m&&m[1]){var c=m[1].toUpperCase();try{_LS.setItem('pe_pending_ref',c)}catch(e){}return c}
  try{return _LS.getItem('pe_pending_ref')||''}catch(e){return ''}
 })();
-function fm(){$('lf').innerHTML=MD?regPhotoBox()+fi('Username (6 characters)','text','lu')+fi('Full Name','text','lfn')+fi('Mobile number','tel','lm',1)+fi('Email ID','email','le')+fi('Password (8 characters)','password','lp')+fi('Referral code (optional)','text','lr')+(PENDING_REF?'<div style="font-size:11.5px;color:#22c55e;font-weight:700;margin-top:-4px">🎁 Referral code ('+PENDING_REF+') auto-applied from link!</div>':'')+'<label class="tcb"><input type="checkbox" id="lg2"> I agree to the <u id="lt4">Terms &amp; Conditions</u></label>':fi('Username, mobile or email','text','lu')+fi('Password','password','lp');
+function fm(){$('lf').innerHTML=MD?fi('Username (6 characters)','text','lu')+fi('Full Name','text','lfn')+fi('Mobile number','tel','lm',1)+fi('Email ID','email','le')+fi('Password (8 characters)','password','lp')+fi('Referral code (optional)','text','lr')+(PENDING_REF?'<div style="font-size:11.5px;color:#22c55e;font-weight:700;margin-top:-4px">🎁 Referral code ('+PENDING_REF+') auto-applied from link!</div>':'')+'<label class="tcb"><input type="checkbox" id="lg2"> I agree to the <u id="lt4">Terms &amp; Conditions</u></label>':fi('Username, mobile or email','text','lu')+fi('Password','password','lp');
 if(MD&&PENDING_REF&&$('lr')){$('lr').value=PENDING_REF;$('lr').style.borderColor='#22c55e'}
 $('lb').textContent=MD?'Create Account':'Login';qa('#lt div').forEach(function(d){d.classList.toggle('on',+d.dataset.m==MD)});
 var m=$('lm');if(m)m.oninput=function(){m.value=m.value.replace(/\D/g,'')};
 var rpf=$('regPf');if(rpf)rpf.onchange=function(){var f=this.files&&this.files[0];if(!f)return;if(!/^image\//.test(f.type))return tt('Please choose an image');var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var c=document.createElement('canvas'),z=256,s=Math.min(im.width,im.height);c.width=c.height=z;c.getContext('2d').drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,z,z);regPhotoData=c.toDataURL('image/jpeg',.82);var av=$('regAvPrev'),tx=$('regPhTxt');if(av){av.style.background='url('+regPhotoData+') center/cover';av.textContent=''}if(tx)tx.textContent='✅ Photo uploaded & ready';tt('Profile photo selected!')};im.onerror=function(){tt('Could not read that image')};im.src=rd.result};rd.readAsDataURL(f)}}
 qa('#lt div').forEach(function(d){d.onclick=function(){MD=+d.dataset.m;regPhotoData=null;fm()}});
-$('gg').onclick=function(){tt('Google Sign-In is not connected yet. Please use Sign Up.')};
+
 $('lb').onclick=async function(){var u=$('lu').value.trim(),p=$('lp').value;var body={};
 if(MD){var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),rc=$('lr')?$('lr').value.trim().toUpperCase():'';
-if(!/^\\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
+if(!/^\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
 if(fn.length<2)return tt('Please enter your Full Name');
-if(!/^[6-9]\\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
-if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(e))return tt('Enter a valid email ID');
+if(!/^[6-9]\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
+if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))return tt('Enter a valid email ID');
 if(p.length<8||p.length>128)return tt('Password must be 8–128 characters');
 if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
 body={username:u,full_name:fn,phone:m,email:e,password:p,referral_code:rc};
