@@ -12,15 +12,33 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.JavascriptInterface;
+import android.content.SharedPreferences;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public final class MainActivity extends Activity {
     private WebView webView;
+    private SharedPreferences sessionPrefs;
+
+    private final class SessionBridge {
+        @JavascriptInterface public String getToken() {
+            return sessionPrefs.getString("api_token", "");
+        }
+        @JavascriptInterface public void setToken(String token) {
+            if (token != null && token.length() >= 32 && token.length() <= 256) {
+                sessionPrefs.edit().putString("api_token", token).apply();
+            }
+        }
+        @JavascriptInterface public void clearToken() {
+            sessionPrefs.edit().remove("api_token").apply();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sessionPrefs = getSharedPreferences("playearn_session", MODE_PRIVATE);
 
         Window window = getWindow();
         window.setStatusBarColor(Color.rgb(7, 3, 26));
@@ -53,6 +71,7 @@ public final class MainActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
 
+        webView.addJavascriptInterface(new SessionBridge(), "AndroidSession");
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
             @Override
