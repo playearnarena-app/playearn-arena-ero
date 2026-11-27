@@ -15,8 +15,21 @@ android {
         buildConfigField 'String', 'GOOGLE_WEB_CLIENT_ID', '"370770458519-sobjb4r7blc256dpg5hiq8iq106ep5l8.apps.googleusercontent.com"'
     }
 
+    signingConfigs {
+        beta {
+            def keyPath = System.getenv('ANDROID_KEYSTORE_PATH')
+            if (keyPath) {
+                storeFile file(keyPath)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
     buildTypes {
         debug {
+            if (System.getenv('ANDROID_KEYSTORE_PATH')) signingConfig signingConfigs.beta
             applicationIdSuffix '.beta'
             versionNameSuffix '-beta'
         }
