@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://playearn-arena-download.onrender.com/sitemap.xml
