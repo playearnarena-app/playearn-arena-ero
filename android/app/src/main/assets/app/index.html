@@ -1231,7 +1231,7 @@ var ld=0,li=setInterval(function(){ld+=4;$('ld').style.width=ld+'%';if(ld>=100){
 function startAd(){var t=0;clearInterval(startAd.h);['c1','c2','c3'].forEach(function(i){$(i).classList.remove('on')});$('ab').style.width='0';var b=$('ac2');b.disabled=true;b.textContent='Please wait...';
 $('c1').classList.add('on');startAd.h=setInterval(function(){t++;var p=t/30;$('ab').style.width=p*100+'%';$('at').textContent='0:'+('0'+t).slice(-2)+' / 0:30';if(t==2)$('c2').classList.add('on');
 if(t>=30){clearInterval(startAd.h);$('c3').classList.add('on');b.disabled=false;b.textContent='Claim ₹1.00'}},300)}
-$('ac2').onclick=function(){if(this.disabled)return;S.ads+=1;S.done=Math.min(50,S.done+1);S.tx.unshift({n:'Ad Reward',d:now(),a:'+₹1.00',k:1});tt('₹1.00 added to your wallet');go('home')};
+$('ac2').onclick=function(){tt('Ad rewards are not enabled yet.')};
 /* Spin */
 var N=[5,3,7,2,1,0,6,4],w=$('wh'),rot=0,busy=0;
 N.forEach(function(v,i){var a=i*45+22.5,s=document.createElement('s');s.textContent=v;s.style.transform='rotate('+a+'deg) translateY(-82px) rotate(-'+a+'deg)';w.insertBefore(s,w.firstChild)});
@@ -1239,17 +1239,17 @@ var NS=0;
 function fmt(ms){var s=Math.ceil(ms/1000),p=function(n){return ('0'+n).slice(-2)};return p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)}
 function tick(){var l=NS-Date.now(),b=$('sn'),c=$('wb');if(l>0){b.textContent='⏳ Next spin in '+fmt(l);b.style.opacity='.6';c.textContent='⏳';c.style.fontSize='20px'}else{b.textContent='Spin Now';b.style.opacity='1';c.textContent='SPIN';c.style.fontSize=''}}
 tick();setInterval(tick,1000);
-function spin(){if(busy)return;if(Date.now()<NS)return tt('Next spin in '+fmt(NS-Date.now()));busy=1;NS=Date.now()+864e5;try{_LS.setItem('pe_ns_'+ME,NS)}catch(e){}tick();var i=Math.floor(Math.random()*8);rot+=1800;rot=rot-(rot%360)+360-(i*45+22.5);w.style.transform='rotate('+rot+'deg)';
+function spin(){return tt('Spin rewards are not enabled yet.');if(busy)return;if(Date.now()<NS)return tt('Next spin in '+fmt(NS-Date.now()));busy=1;NS=Date.now()+864e5;try{_LS.setItem('pe_ns_'+ME,NS)}catch(e){}tick();var i=Math.floor(Math.random()*8);rot+=1800;rot=rot-(rot%360)+360-(i*45+22.5);w.style.transform='rotate('+rot+'deg)';
 setTimeout(function(){busy=0;var v=N[i];if(v){S.pts+=v;S.sp.unshift(['+'+v+(v>1?' Points':' Point'),now()]);S.tx.unshift({n:'Spin Reward',d:now(),a:'+'+v+' Points'});tt('You won '+v+' points!')}else tt('Better luck next time!');up()},3300)}
 $('wb').onclick=spin;$('sn').onclick=spin;
 /* Wallet */
-$('cv').onclick=function(){if(S.pts<10)return tt('Minimum 10 points needed to convert (10 Points = ₹1)');var p=Math.min(S.pts,5000);S.pts-=p;var rs=+(p*0.1).toFixed(2);S.ads=+(S.ads+rs).toFixed(2);S.tx.unshift({n:'Converted',d:now(),a:'-'+p+' Points (+₹'+rs.toFixed(2)+')',r:1});up();tt('Converted '+p+' points to ₹'+rs.toFixed(2))};
+$('cv').onclick=function(){return tt('Points conversion is not enabled yet.');if(S.pts<10)return tt('Minimum 10 points needed to convert (10 Points = ₹1)');var p=Math.min(S.pts,5000);S.pts-=p;var rs=+(p*0.1).toFixed(2);S.ads=+(S.ads+rs).toFixed(2);S.tx.unshift({n:'Converted',d:now(),a:'-'+p+' Points (+₹'+rs.toFixed(2)+')',r:1});up();tt('Converted '+p+' points to ₹'+rs.toFixed(2))};
 $('t1').onclick=function(){$('t1').classList.add('on');$('t2').classList.remove('on');up()};
 $('t2').onclick=function(){$('t2').classList.add('on');$('t1').classList.remove('on');var c=S.tx.filter(function(x){return x.n=='Converted'});$('tl').innerHTML=c.length?c.map(function(x){return '<div class="tx"><div>'+x.n+'<small>'+x.d+'</small></div><em style="color:#f87171">'+x.a+'</em></div>'}).join(''):'<div class="ctr mut" style="padding:20px">No conversions yet</div>'};
 /* Withdraw */
 qa('#ch div').forEach(function(d){d.onclick=function(){qa('#ch div').forEach(function(x){x.classList.remove('on')});d.classList.add('on');S.amt=parseInt(d.textContent.slice(1))}});
 qa('#wd .m').forEach(function(m){m.onclick=function(){qa('#wd .m').forEach(function(x){x.classList.remove('on')});m.classList.add('on')}});
-$('wc').onclick=function(){if(S.amt>S.ads)return tt('Insufficient Ads Cash balance');S.ads-=S.amt;S.tx.unshift({n:'Withdrawal',d:'Pending',a:'-₹'+S.amt+'.00',r:1,y:1});up();tt('Withdrawal request submitted');go('wal')};
+$('wc').onclick=function(){return tt('Cash withdrawals are currently disabled.');if(S.amt>S.ads)return tt('Insufficient Ads Cash balance');S.ads-=S.amt;S.tx.unshift({n:'Withdrawal',d:'Pending',a:'-₹'+S.amt+'.00',r:1,y:1});up();tt('Withdrawal request submitted');go('wal')};
 /* Lists */
 function rows(id,a){$(id).innerHTML=a.map(function(x){return '<div class="li"'+(x[3]?' data-go="'+x[3]+'"':'')+'><span>'+x[0]+'</span><span>'+x[1]+'</span>'+(x[2]||'<u>›</u>')+'</div>'}).join('')}
 rows('pl',[['👛','My Wallet','','wal'],['🎁','Gift Code','','gift'],['🧾','My Transactions','','wal'],['👥','My Referrals','','refer'],['🔔','Notifications','','set'],['❓','Help &amp; Support','','help'],['⚙️','Settings','','set']]);
