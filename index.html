@@ -584,7 +584,7 @@ function applyAdminCMS(){
         window._cmsPopupShown=true;
         const pop=document.createElement('div');
         pop.className='md on cms-dyn-ad';
-        pop.innerHTML=`<div class="mb" style="max-width:480px;position:relative"><button onclick="this.closest('.cms-dyn-ad').remove()" style="position:absolute;top:12px;right:14px;background:none;border:0;color:#fff;font-size:22px;cursor:pointer">×</button><span class="pill" style="margin-bottom:10px">📢 Sponsored Offer</span><h3>${escH(ad.title||'Special Offer')}</h3><p>${escH(ad.sub||'')}</p>${ad.img?`<img src="${ad.img}" style="max-height:180px;margin:0 auto 14px;border-radius:12px">`:''}<a href="${escH(ad.url||'#')}" target="_blank" rel="noopener" class="btn pr">${escH(ad.btn||'Claim Offer Now')}</a></div>`;
+        pop.innerHTML=`<div class="mb" style="max-width:480px;position:relative"><button onclick="this.closest('.cms-dyn-ad').remove()" style="position:absolute;top:12px;right:14px;background:none;border:0;color:#fff;font-size:22px;cursor:pointer">×</button><span class="pill" style="margin-bottom:10px">📢 Sponsored Offer</span><h3>${escH(ad.title||'Special Offer')}</h3><p>${escH(ad.sub||'')}</p>${ad.img?`<img src="${ad.img}" alt="${escH(ad.title||'Sponsored offer')}" loading="lazy" decoding="async" style="max-height:180px;margin:0 auto 14px;border-radius:12px">`:''}<a href="${escH(ad.url||'#')}" target="_blank" rel="noopener" class="btn pr">${escH(ad.btn||'Claim Offer Now')}</a></div>`;
         document.body.appendChild(pop);
       }
     }else{
