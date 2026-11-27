@@ -1334,7 +1334,7 @@ var PENDING_REF=(function(){
  if(m&&m[1]){var c=m[1].toUpperCase();try{_LS.setItem('pe_pending_ref',c)}catch(e){}return c}
  try{return _LS.getItem('pe_pending_ref')||''}catch(e){return ''}
 })();
-function fm(){$('lf').innerHTML=MD?fi('Username (6 characters)','text','lu')+fi('Full Name','text','lfn')+fi('Mobile number','tel','lm',1)+fi('Email ID','email','le')+fi('Password (8 characters)','password','lp')+fi('Referral code (optional)','text','lr')+(PENDING_REF?'<div style="font-size:11.5px;color:#22c55e;font-weight:700;margin-top:-4px">🎁 Referral code ('+PENDING_REF+') auto-applied from link!</div>':'')+'<label class="tcb"><input type="checkbox" id="lg2"> I agree to the <u id="lt4">Terms &amp; Conditions</u></label>':fi('Username, mobile or email','text','lu')+fi('Password','password','lp');
+function fm(){$('lf').innerHTML=MD?fi('Username (6 characters)','text','lu')+fi('Full Name','text','lfn')+fi('Mobile number','tel','lm',1)+fi('Email ID','email','le')+fi('Password (8 characters)','password','lp')+fi('Referral code (optional)','text','lr')+(PENDING_REF?'<div style="font-size:11.5px;color:#22c55e;font-weight:700;margin-top:-4px">🎁 Referral code ('+PENDING_REF+') auto-applied from link!</div>':'')+'<label class="tcb"><input type="checkbox" id="lg2"> I agree to the <u id="lt4">Terms &amp; Conditions</u></label>':fi('Email ID','email','lu')+fi('Password','password','lp');
 if(MD&&PENDING_REF&&$('lr')){$('lr').value=PENDING_REF;$('lr').style.borderColor='#22c55e'}
 $('lb').textContent=MD?'Create Account':'Login';qa('#lt div').forEach(function(d){d.classList.toggle('on',+d.dataset.m==MD)});
 var m=$('lm');if(m)m.oninput=function(){m.value=m.value.replace(/\D/g,'')};
