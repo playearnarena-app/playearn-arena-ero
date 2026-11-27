@@ -150,16 +150,6 @@ public final class MainActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.rgb(7, 3, 26));
 
-        TextView notice = new TextView(this);
-        notice.setText("BETA TEST • Rewards shown in this preview are simulations. No real earnings or cash payouts.");
-        notice.setTextColor(Color.WHITE);
-        notice.setTextSize(11);
-        notice.setPadding(14, 10, 14, 10);
-        notice.setBackgroundColor(Color.rgb(54, 35, 105));
-        root.addView(notice, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-
         webView = new WebView(this);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
