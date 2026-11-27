@@ -55,7 +55,10 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public void createAccount(String email, String password) {
             runOnUiThread(() -> FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult().getUser() != null) sendFirebaseToken(task.getResult().getUser());
+                    if (task.isSuccessful() && task.getResult().getUser() != null) {
+                        FirebaseUser createdUser = task.getResult().getUser();
+                        createdUser.sendEmailVerification().addOnCompleteListener(verification -> sendFirebaseToken(createdUser));
+                    }
                     else notifyFirebaseError(task.getException() == null ? "Firebase registration failed." : task.getException().getMessage());
                 }));
         }
