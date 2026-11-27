@@ -12,7 +12,20 @@
           "package_name": "com.playearn.arena.beta"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "451273411074-dtm1qs2csb3u9pujgu1a9a9dn1oour9t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.playearn.arena.beta",
+            "certificate_hash": "a680420306b6b69e1a2084a1f3f99826d8fddefd"
+          }
+        },
+        {
+          "client_id": "451273411074-cg6sman7n2skh69ubfsnuu0kvu1bq95l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCUOOwCj9e1MErlNCdb5iga3l_gAke7ViM"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451273411074-cg6sman7n2skh69ubfsnuu0kvu1bq95l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
