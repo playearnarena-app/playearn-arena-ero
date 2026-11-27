@@ -12,7 +12,7 @@ android {
         minSdk 23
         targetSdk 35
         versionCode 1
-        versionName '0.1.0-beta'
+        versionName '0.1.0'
         buildConfigField 'String', 'GOOGLE_WEB_CLIENT_ID', '"370770458519-sobjb4r7blc256dpg5hiq8iq106ep5l8.apps.googleusercontent.com"'
     }
 
