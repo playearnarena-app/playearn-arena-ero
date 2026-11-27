@@ -1346,10 +1346,10 @@ $('lb').onclick=function(){
  var u=$('lu').value.trim(),pw=$('lp').value,body={};
  if(MD){
   var fn=$('lfn')?$('lfn').value.trim():'',m=$('lm').value.trim(),e=$('le').value.trim().toLowerCase(),rc=$('lr')?$('lr').value.trim().toUpperCase():'';
-  if(!/^\\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
+  if(!/^\w{6}$/.test(u))return tt('Username must be exactly 6 characters (letters, numbers or _)');
   if(fn.length<2)return tt('Please enter your Full Name');
-  if(!/^[6-9]\\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
-  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(e))return tt('Enter a valid email ID');
+  if(!/^[6-9]\d{9}$/.test(m))return tt('Enter a valid 10-digit mobile number');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(e))return tt('Enter a valid email ID');
   if(pw.length<8||pw.length>128)return tt('Password must be 8–128 characters');
   if(!$('lg2').checked)return tt('Please accept the Terms & Conditions');
   body={username:u,full_name:fn,phone:m,referral_code:rc};
@@ -1359,7 +1359,7 @@ $('lb').onclick=function(){
   AndroidFirebase.createAccount(e,pw);
  }else{
   if(!u||!pw)return tt('Enter your email and password');
-  if(!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$/.test(u))return tt('Please login using your registered email address');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(u))return tt('Please login using your registered email address');
   if(!window.AndroidFirebase||typeof AndroidFirebase.signIn!=='function')return tt('Firebase authentication is not available. Update the app.');
   window._peAuthProfile={};window._peAuthProvider='password';
   $('lb').disabled=true;$('lb').textContent='Signing in...';
