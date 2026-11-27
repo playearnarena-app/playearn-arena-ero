@@ -1298,7 +1298,7 @@ function art(n){var m={'Amazon Pay':'<span class="lg" style="background:#111;col
 function tl(t,id,a){return '<b style="font-size:15px">'+t+'</b><div class="tgr">'+a.map(function(n,i){return '<div class="tl'+(i?'':' on')+'" onclick="pk(\''+id+'\',\''+n+'\',this)">'+art(n)+n+'</div>'}).join('')+'</div><select id="'+id+'" style="display:none">'+opts(a)+'</select>'+(id=='f2'?'<div class="mut sm">Gift card is issued only when valid supply/API and redemption support exist for that provider.</div>':'')}
 function pk(id,v,el){$(id).value=v;Array.prototype.forEach.call(el.parentNode.children,function(x){x.classList.remove('on')});el.classList.add('on');if(id=='f3')fp();if(id=='f2')ah()}
 ['home','quiz','spin','wal','pr','ad','wd','help','set','gift'].forEach(function(i){if($(i))$(i).insertAdjacentHTML('afterbegin','<svg class="wm lw"><use href="#lg"/></svg>')});
-var API_BASE='https://playearn-arena-api.onrender.com/api/v1';
+var API_BASE='https://130.210.13.115/api/v1';
 function apiToken(){try{return window.AndroidSession?AndroidSession.getToken():_LS.getItem('pe_api_token')||''}catch(e){return ''}}
 function storeApiToken(t){try{if(window.AndroidSession)AndroidSession.setToken(t);else _LS.setItem('pe_api_token',t)}catch(e){}}
 function clearApiToken(){try{if(window.AndroidSession)AndroidSession.clearToken();else _LS.removeItem('pe_api_token')}catch(e){}}
