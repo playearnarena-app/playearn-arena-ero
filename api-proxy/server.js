@@ -25,7 +25,7 @@ const server = http.createServer((req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Idempotency-Key",
+      "Access-Control-Allow-Headers": "Content-Type, Idempotency-Key, Authorization",
       "Access-Control-Max-Age": "600"
     });
     return res.end();
