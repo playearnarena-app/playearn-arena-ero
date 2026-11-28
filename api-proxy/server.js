@@ -17,16 +17,24 @@ const server = http.createServer((req, res) => {
 
   if (origin) {
     res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Vary", "Origin");
   }
+  // The Android client authenticates with explicit bearer tokens. Credentialed
+  // cross-origin cookies are unnecessary and would broaden the browser trust boundary.
   res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("X-Frame-Options", "DENY");
 
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Idempotency-Key, Authorization",
-      "Access-Control-Max-Age": "600"
+      "Access-Control-Max-Age": "600",
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Referrer-Policy": "no-referrer",
+      "X-Frame-Options": "DENY"
     });
     return res.end();
   }
