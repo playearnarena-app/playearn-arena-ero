@@ -1372,7 +1372,7 @@ window.onFirebaseEmailNotVerified=function(){$('lb').disabled=false;$('lb').text
 window.onFirebaseAuthSuccess=async function(idToken){
  var b=$('lb'),g=$('googleLogin');if(b){b.disabled=true;b.textContent='Connecting account...'}if(g)g.disabled=true;
  try{
-  var pending={};try{pending=JSON.parse(_LS.getItem('pe_pending_profile')||'{}')}catch(x){}var body=Object.assign({},pending,window._peAuthProfile||{},{idToken:idToken,provider:window._peAuthProvider||'password'});
+  var pending={};if((window._peAuthProvider||'password')==='password'){try{pending=JSON.parse(_LS.getItem('pe_pending_profile')||'{}')}catch(x){}}var body=Object.assign({},pending,window._peAuthProfile||{},{idToken:idToken,provider:window._peAuthProvider||'password'});
   var d=await apiCall('/auth/firebase',{method:'POST',body:body});
   if(!d.token||!d.user)throw new Error('Server did not return a valid PlayEarn session');
   storeApiToken(d.token);try{_LS.removeItem('pe_pending_profile')}catch(x){}var who=d.user.username||('player_'+d.user.id);
