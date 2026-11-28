@@ -1,1 +1,47 @@
-{}
+{
+  "project_info": {
+    "project_number": "451273411074",
+    "project_id": "play-earn-arena",
+    "storage_bucket": "play-earn-arena.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451273411074:android:4320811f546dabd566f51b",
+        "android_client_info": {
+          "package_name": "com.playearn.arena.beta"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "451273411074-aunn19ftsfnnc39hdt41t5kk0605mj2s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.playearn.arena.beta",
+            "certificate_hash": "dd75f052989f67853db486a1ce0fe6fdb1c22f92"
+          }
+        },
+        {
+          "client_id": "451273411074-cg6sman7n2skh69ubfsnuu0kvu1bq95l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUOOwCj9e1MErlNCdb5iga3l_gAke7ViM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451273411074-cg6sman7n2skh69ubfsnuu0kvu1bq95l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
