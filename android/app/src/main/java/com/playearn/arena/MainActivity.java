@@ -57,7 +57,13 @@ public final class MainActivity extends Activity {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult().getUser() != null) {
                         FirebaseUser createdUser = task.getResult().getUser();
-                        createdUser.sendEmailVerification().addOnCompleteListener(verification -> sendFirebaseToken(createdUser));
+                        createdUser.sendEmailVerification().addOnCompleteListener(verification -> {
+                            FirebaseAuth.getInstance().signOut();
+                            if (verification.isSuccessful()) {
+                                if (webView != null) webView.post(() -> webView.evaluateJavascript(
+                                    "window.onFirebaseVerificationSent && window.onFirebaseVerificationSent();", null));
+                            } else notifyFirebaseError("Account created, but verification email could not be sent. Try again later.");
+                        });
                     }
                     else notifyFirebaseError(task.getException() == null ? "Firebase registration failed." : task.getException().getMessage());
                 }));
@@ -69,10 +75,29 @@ public final class MainActivity extends Activity {
                     else notifyFirebaseError(task.getException() == null ? "Firebase login failed." : task.getException().getMessage());
                 }));
         }
+        @JavascriptInterface public void restoreSession() {
+            runOnUiThread(() -> {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user != null) user.reload().addOnCompleteListener(task -> {
+                    FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+                    if (task.isSuccessful() && current != null) sendFirebaseToken(current);
+                    else notifyFirebaseError("Saved Firebase session could not be restored. Please login again.");
+                });
+            });
+        }
+        @JavascriptInterface public void signOut() {
+            runOnUiThread(() -> FirebaseAuth.getInstance().signOut());
+        }
     }
 
     private void sendFirebaseToken(FirebaseUser user) {
         if (user == null || webView == null) { notifyFirebaseError("Firebase user session unavailable."); return; }
+        if (!user.isEmailVerified()) {
+            FirebaseAuth.getInstance().signOut();
+            webView.post(() -> webView.evaluateJavascript(
+                "window.onFirebaseEmailNotVerified && window.onFirebaseEmailNotVerified();", null));
+            return;
+        }
         user.getIdToken(true).addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
                 String token = task.getResult().getToken();
